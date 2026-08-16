@@ -39,6 +39,10 @@ looking.
 
 - Declares the `org.apache.parquet` type, so `.parquet` files get Macquet's
   icon and open on double-click.
+- Press space on a `.parquet` file for a **Quick Look** preview: schema with
+  types, the first 60 rows, and footer stats. The extension runs the same
+  `ParquetTable` the app does, so it's a third front end over the core rather
+  than a reimplementation.
 - Real document windows: the title bar carries the file's proxy icon — drag it
   into Mail, ⌘-click it for the folder path.
 - Drag a file (or a folder of shards) onto the window or the Dock icon.
@@ -96,21 +100,23 @@ macquetql sample demo.parquet
 | ⌘R | reload from disk |
 | ⇧⌘R | reveal in Finder |
 | ⌘C | copy the selected row |
+| ⇧⌘C | copy the focused cell |
 
 ## Layout
 
 ```
 Sources/
-  MacquetCore/   ParquetTable actor, SQL building, the data model
-  Macquet/       SwiftUI app
-  MacquetQL/     CLI
+  MacquetCore/       ParquetTable actor, SQL building, the data model
+  Macquet/           SwiftUI app
+  MacquetQL/         CLI
+  MacquetQuickLook/  Finder preview extension (.appex)
 Scripts/
   build-app.sh   builds and installs the .app bundle
   make-icon.swift  draws Macquet.icns from scratch
 ```
 
-`MacquetCore` has no UI dependencies — the app and the CLI are two front ends
-over the same actor.
+`MacquetCore` has no UI dependencies — the app, the CLI and the Quick Look
+extension are three front ends over the same actor.
 
 ## Notes
 
@@ -127,8 +133,13 @@ over the same actor.
   window to a PNG. It exists because the app was developed on a machine
   without screen-recording permission.
 
+- Quick Look previews match on the `org.apache.parquet` type, which comes from
+  the `.parquet` extension. Files in the Hugging Face cache are symlinks to
+  extensionless blobs that macOS types as `public.data`, so they get the generic
+  preview — claiming `public.data` would make Macquet the previewer for every
+  unidentified file on the system. Opening them in the app works fine.
+
 ### Not built
 
-No Quick Look extension, so Finder's spacebar preview doesn't show Parquet
-contents yet. That needs a separate `.appex` bundle and is the obvious next
-step for Finder integration.
+No Spotlight importer, so Parquet files aren't indexed by row count or column
+names. The app is ad-hoc signed for local use, not notarized for distribution.

@@ -23,6 +23,18 @@ let package = Package(
             dependencies: ["MacquetCore"],
             swiftSettings: [.swiftLanguageMode(.v5)]
         ),
+        // The Quick Look extension. It is assembled into an `.appex` bundle by
+        // Scripts/build-app.sh, which is why the entry point is overridden:
+        // an app extension is launched through `NSExtensionMain`, not `main`.
+        .executableTarget(
+            name: "MacquetQuickLook",
+            dependencies: ["MacquetCore"],
+            swiftSettings: [.swiftLanguageMode(.v5)],
+            linkerSettings: [
+                .linkedFramework("QuickLookUI"),
+                .unsafeFlags(["-Xlinker", "-e", "-Xlinker", "_NSExtensionMain"]),
+            ]
+        ),
         .executableTarget(
             name: "MacquetQL",
             dependencies: [

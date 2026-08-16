@@ -25,8 +25,10 @@ echo "==> Building ($CONFIGURATION)"
 cd "$ROOT"
 swift build -c "$CONFIGURATION" --product Macquet
 swift build -c "$CONFIGURATION" --product MacquetQL
+swift build -c "$CONFIGURATION" --product MacquetQuickLook
 
 BIN="$ROOT/.build/$CONFIGURATION"
+APPEX="$APP/Contents/PlugIns/MacquetQuickLook.appex"
 
 echo "==> Assembling Macquet.app"
 rm -rf "$APP"
@@ -39,10 +41,23 @@ cp "$ROOT/Resources/Info.plist" "$APP/Contents/Info.plist"
 cp "$ROOT/Resources/Macquet.icns" "$APP/Contents/Resources/Macquet.icns"
 printf 'APPL????' > "$APP/Contents/PkgInfo"
 
+echo "==> Embedding Quick Look extension"
+mkdir -p "$APPEX/Contents/MacOS"
+cp "$BIN/MacquetQuickLook" "$APPEX/Contents/MacOS/MacquetQuickLook"
+cp "$ROOT/Resources/QuickLook-Info.plist" "$APPEX/Contents/Info.plist"
+printf 'XPC!????' > "$APPEX/Contents/PkgInfo"
+
 echo "==> Signing (ad-hoc)"
-# Ad-hoc signing is enough for a locally built app and keeps Launch Services
-# from treating the bundle as damaged.
-codesign --force --deep --sign - "$APP" 2>/dev/null
+# Nested code is signed first, then the container seals it. `--deep` would
+# re-sign the extension on the way past and strip its sandbox entitlements,
+# which stops Quick Look loading it at all.
+codesign --force --sign - \
+  --entitlements "$ROOT/Resources/QuickLook.entitlements" \
+  --identifier com.justinluque.Macquet.QuickLook \
+  "$APPEX"
+codesign --force --sign - --identifier com.justinluque.Macquet "$APP"
+
+codesign --verify --verbose=1 "$APPEX" 2>&1 | sed 's/^/    /'
 
 echo "==> Built $APP"
 
@@ -56,6 +71,14 @@ if [ "$INSTALL" = true ]; then
   echo "==> Registering with Launch Services"
   /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister \
     -f "$DESTINATION/Macquet.app"
+
+  echo "==> Registering the Quick Look extension"
+  # Extensions are discovered from the installed bundle, not the build
+  # directory, so this has to point at the copy in $DESTINATION.
+  pluginkit -a "$DESTINATION/Macquet.app/Contents/PlugIns/MacquetQuickLook.appex" 2>/dev/null || true
+  qlmanage -r >/dev/null 2>&1 || true
+  qlmanage -r cache >/dev/null 2>&1 || true
+  pluginkit -m -p com.apple.quicklook.preview -v 2>/dev/null | grep -i macquet | sed 's/^/    /' || true
 
   # Put the CLI on PATH if a sensible bin directory exists.
   for candidate in "$HOME/.local/bin" "/usr/local/bin"; do

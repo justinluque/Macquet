@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>MacquetQuickLook</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.justinluque.Macquet.QuickLook</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Macquet Quick Look</string>
+	<key>CFBundleDisplayName</key>
+	<string>Macquet Quick Look</string>
+	<!-- App extensions are XPC services, not applications. -->
+	<key>CFBundlePackageType</key>
+	<string>XPC!</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>15.0</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>A window into Parquet.</string>
+
+	<key>NSExtension</key>
+	<dict>
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.quicklook.preview</string>
+		<!-- @objc(PreviewViewController) keeps this name stable through
+		     Swift's module-qualified mangling. -->
+		<key>NSExtensionPrincipalClass</key>
+		<string>PreviewViewController</string>
+		<key>NSExtensionAttributes</key>
+		<dict>
+			<key>QLSupportedContentTypes</key>
+			<array>
+				<string>org.apache.parquet</string>
+			</array>
+			<key>QLSupportsSearchableItems</key>
+			<false/>
+		</dict>
+	</dict>
+</dict>
+</plist>
