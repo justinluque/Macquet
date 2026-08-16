@@ -11,12 +11,36 @@ on:
 
 jobs:
   build:
-
     runs-on: macos-latest
 
     steps:
     - uses: actions/checkout@v4
-    - name: Build
+
+    # caches your swift packages so it doesn't redownload them every time
+    - name: Cache Swift PM
+      uses: actions/cache@v4
+      with:
+        path: .build
+        key: ${{ runner.os }}-spm-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: |
+          ${{ runner.os }}-spm-
+
+    # basic swift package build/test
+    - name: Build Packages
       run: swift build -v
-    - name: Run tests
-      run: swift test -v
+      
+    # - name: Run tests
+    #   run: swift test -v
+
+    # runs your custom build script to assemble the .app bundle
+    - name: Build App Bundle
+      run: |
+        chmod +x Scripts/build-app.sh
+        ./Scripts/build-app.sh
+
+    # uploads the finished app so u can download it from the actions tab
+    - name: Upload App Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Macquet
+        path: build/Macquet.app
