@@ -1,0 +1,15 @@
+# SwiftPM
+.build/
+
+# Assembled app bundle
+build/
+
+# Intermediate iconset — regenerate with Scripts/make-icon.swift.
+# Macquet.icns is committed so a clean checkout builds without it.
+Resources/Macquet.iconset/
+
+# Generated demo data — recreate with `macquetql sample`
+Examples/*.parquet
+
+.DS_Store
+*.xcuserstate

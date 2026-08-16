@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>Macquet</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.justinluque.Macquet</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Macquet</string>
+	<key>CFBundleDisplayName</key>
+	<string>Macquet</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>CFBundleIconFile</key>
+	<string>Macquet</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>15.0</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.developer-tools</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSSupportsAutomaticTermination</key>
+	<true/>
+	<key>NSSupportsSuddenTermination</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>A window into Parquet.</string>
+
+	<!-- No system-supplied UTI exists for Parquet, so Macquet declares one.
+	     Importing (rather than exporting) it means Macquet defers to the
+	     definition if another app ever ships an authoritative one. -->
+	<key>UTImportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>org.apache.parquet</string>
+			<key>UTTypeDescription</key>
+			<string>Apache Parquet File</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.database</string>
+			</array>
+			<key>UTTypeIconFile</key>
+			<string>Macquet</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>parquet</string>
+					<string>parq</string>
+					<string>pqt</string>
+				</array>
+				<key>public.mime-type</key>
+				<array>
+					<string>application/vnd.apache.parquet</string>
+					<string>application/x-parquet</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Apache Parquet File</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>CFBundleTypeIconFile</key>
+			<string>Macquet</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>org.apache.parquet</string>
+			</array>
+		</dict>
+		<!-- Sharded datasets arrive as a folder of .parquet parts. Ranking
+		     this Alternate keeps Macquet out of the way for ordinary folders
+		     while still offering it under Open With. -->
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Folder of Parquet Shards</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Alternate</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.folder</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>
