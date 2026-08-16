@@ -480,6 +480,53 @@ final class TableModel: ObservableObject {
         await copyRow(at: index, as: format)
     }
 
+
+    /// Full, untruncated values for one row, from the cache when possible.
+    private func values(forRow index: Int) async -> [CellValue]? {
+        if index == selectedRowIndex, let cached = selectedRowValues { return cached }
+        guard let table else { return nil }
+        return try? await table.fullRow(at: index, spec: spec)
+    }
+
+    /// Copies a single cell. Like row copy, this takes the untruncated value
+    /// rather than the grid's clipped display text.
+    func copyCell(row index: Int, column: ColumnInfo) async {
+        guard let values = await values(forRow: index), column.index < values.count else {
+            return
+        }
+        let value = values[column.index]
+        Finder.copyText(value.isNull ? "" : value.stringValue)
+    }
+
+    /// Narrows the view to rows whose `column` equals this cell's value.
+    func filterToCell(row index: Int, column: ColumnInfo) async {
+        guard let values = await values(forRow: index), column.index < values.count else {
+            return
+        }
+        let value = values[column.index]
+        let quoted = SQL.identifier(column.name)
+        if value.isNull {
+            await setWhereClause("\(quoted) IS NULL")
+        } else {
+            await setWhereClause(
+                "CAST(\(quoted) AS VARCHAR) = \(SQL.literal(value.stringValue))")
+        }
+    }
+
+    /// The cell the user last clicked, so ⇧⌘C knows what to copy.
+    func focusCell(row index: Int, column: ColumnInfo) {
+        focusedColumn = column.name
+        select(rowIndex: index)
+    }
+
+    func copyFocusedCell() async {
+        guard let index = selectedRowIndex,
+            let name = focusedColumn,
+            let column = schema.first(where: { $0.name == name })
+        else { return }
+        await copyCell(row: index, column: column)
+    }
+
     // MARK: - Helpers
 
     private func errorText(_ error: Error) -> String {

@@ -65,14 +65,14 @@ final class ParquetLibrary: ObservableObject {
     }
 
     /// Directory names never worth descending into.
-    private static let prunedDirectories: Set<String> = [
+    private nonisolated static let prunedDirectories: Set<String> = [
         ".git", ".build", "node_modules", "DerivedData", "Library", ".venv",
         "venv", "site-packages", "__pycache__", ".Trash", "Pods", ".next",
     ]
 
-    private static let parquetExtensions: Set<String> = ["parquet", "parq", "pqt"]
-    private static let maxScanDepth = 10
-    private static let maxScanResults = 4000
+    private nonisolated static let parquetExtensions: Set<String> = ["parquet", "parq", "pqt"]
+    private nonisolated static let maxScanDepth = 10
+    private nonisolated static let maxScanResults = 4000
 
     init() {
         query.searchScopes = [NSMetadataQueryLocalComputerScope]

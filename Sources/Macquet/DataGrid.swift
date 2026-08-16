@@ -138,6 +138,14 @@ struct DataGridView: View {
                 model.jump(toRow: model.visibleRowCount - 1)
                 return .handled
             }
+            // ⌘C copies the row; ⇧⌘C narrows that to the focused cell.
+            .onKeyPress(keys: ["c"], phases: .down) { press in
+                guard press.modifiers.contains(.command),
+                    press.modifiers.contains(.shift)
+                else { return .ignored }
+                Task { await model.copyFocusedCell() }
+                return .handled
+            }
             .copyable(copyPayload())
         }
         .background(Color(nsColor: .textBackgroundColor))
@@ -383,10 +391,10 @@ struct GridRowView: View {
         }
     }
 
-    @ViewBuilder
     private func cell(for column: ColumnInfo, entry: RowEntry?) -> some View {
         let alignment: Alignment = column.kind.isNumeric ? .trailing : .leading
-        Group {
+        let isFocused = model.selectedRowIndex == index && model.focusedColumn == column.name
+        return Group {
             if let entry, column.index < entry.cells.count {
                 let value = entry.cells[column.index]
                 if value.isNull {
@@ -409,5 +417,34 @@ struct GridRowView: View {
         }
         .padding(.horizontal, Theme.cellPadding)
         .frame(width: model.width(for: column), alignment: alignment)
+        // A focused cell is outlined rather than filled: the row already
+        // carries a selection tint, and a second fill on top of it muddies
+        // both.
+        .overlay {
+            if isFocused {
+                Rectangle()
+                    .strokeBorder(Color.accentColor, lineWidth: 1.5)
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { model.focusCell(row: index, column: column) }
+        .contextMenu {
+            Button("Copy Cell") {
+                Task { await model.copyCell(row: index, column: column) }
+            }
+            Button("Filter to This Value") {
+                Task { await model.filterToCell(row: index, column: column) }
+            }
+            Divider()
+            Button("Copy Row as TSV") {
+                Task { await model.copyRow(at: index, as: .tabSeparated) }
+            }
+            Button("Copy Row as JSON") {
+                Task { await model.copyRow(at: index, as: .json) }
+            }
+            Divider()
+            Button("Copy Column Name") { Finder.copyText(column.name) }
+            Button("Hide Column") { model.toggleVisibility(of: column) }
+        }
     }
 }
