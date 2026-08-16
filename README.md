@@ -52,6 +52,11 @@ looking.
 - Notices when the file changes on disk and offers to reload, keeping your
   filter and sort.
 
+## Requirements
+
+macOS 15 or later, and a Swift 6 toolchain (Xcode 26+). The only dependency is
+[duckdb-swift](https://github.com/duckdb/duckdb-swift), pinned to 1.1.3.
+
 ## Install
 
 ```bash
@@ -89,7 +94,7 @@ macquetql sample demo.parquet
 ## Keyboard
 
 | | |
-|---|---|
+| --- | --- |
 | ↑ / ↓ | move the selected row |
 | ⇞ / ⇟ | page through |
 | ↖ / ↘ | first / last row |
@@ -143,3 +148,7 @@ extension are three front ends over the same actor.
 
 No Spotlight importer, so Parquet files aren't indexed by row count or column
 names. The app is ad-hoc signed for local use, not notarized for distribution.
+
+## License
+
+MIT — see [LICENSE](LICENSE). DuckDB is MIT-licensed too.
