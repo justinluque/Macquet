@@ -84,6 +84,13 @@ enum Snapshot {
             model.searchField = argument
         case "sort":
             await model.setSort(column: argument, direction: .descending)
+        case "focus":
+            // `row.column` — exercises the same entry point the tap handler uses.
+            let pieces = argument.split(separator: ".", maxSplits: 1).map(String.init)
+            if pieces.count == 2, let row = Int(pieces[0]),
+                let column = model.schema.first(where: { $0.name == pieces[1] }) {
+                model.focusCell(row: row, column: column)
+            }
         case "jump":
             model.jump(toRow: Int(argument) ?? 0)
         case "hide":
