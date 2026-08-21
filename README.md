@@ -73,6 +73,12 @@ Build without installing:
 ./Scripts/build-app.sh
 ```
 
+Zip the app and publish it as a GitHub release (requires the `gh` CLI):
+
+```bash
+./Scripts/build-app.sh --release v0.1
+```
+
 The first build compiles DuckDB from source and takes a few minutes. After
 that it's seconds.
 

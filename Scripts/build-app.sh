@@ -2,8 +2,9 @@
 #
 # Builds Macquet.app and, optionally, installs it.
 #
-#   ./Scripts/build-app.sh            build into ./build
-#   ./Scripts/build-app.sh --install  also copy to ~/Applications and register
+#   ./Scripts/build-app.sh                build into ./build
+#   ./Scripts/build-app.sh --install      also copy to ~/Applications and register
+#   ./Scripts/build-app.sh --release v0.1 zip the app and publish a GitHub release
 #
 set -euo pipefail
 
@@ -12,13 +13,20 @@ CONFIGURATION="release"
 BUILD_DIR="$ROOT/build"
 APP="$BUILD_DIR/Macquet.app"
 INSTALL=false
+RELEASE_TAG=""
 
-for argument in "$@"; do
-  case "$argument" in
+while [ "$#" -gt 0 ]; do
+  case "$1" in
     --install) INSTALL=true ;;
     --debug) CONFIGURATION="debug" ;;
-    *) echo "unknown option: $argument" >&2; exit 1 ;;
+    --release)
+      shift
+      RELEASE_TAG="${1:-}"
+      [ -n "$RELEASE_TAG" ] || { echo "--release requires a tag, e.g. --release v0.1" >&2; exit 1; }
+      ;;
+    *) echo "unknown option: $1" >&2; exit 1 ;;
   esac
+  shift
 done
 
 echo "==> Building ($CONFIGURATION)"
@@ -92,4 +100,20 @@ if [ "$INSTALL" = true ]; then
   echo
   echo "Installed. Double-click any .parquet file, or run:"
   echo "  open -a Macquet <file.parquet>"
+fi
+
+if [ -n "$RELEASE_TAG" ]; then
+  command -v gh >/dev/null 2>&1 || { echo "gh (GitHub CLI) is required for --release" >&2; exit 1; }
+
+  ZIP="$BUILD_DIR/Macquet-$RELEASE_TAG.zip"
+  echo "==> Zipping $APP"
+  rm -f "$ZIP"
+  ditto -c -k --keepParent "$APP" "$ZIP"
+
+  echo "==> Publishing GitHub release $RELEASE_TAG"
+  gh release create "$RELEASE_TAG" "$ZIP" \
+    --title "Macquet $RELEASE_TAG" \
+    --generate-notes
+
+  echo "==> Released: $(gh release view "$RELEASE_TAG" --json url -q .url)"
 fi
